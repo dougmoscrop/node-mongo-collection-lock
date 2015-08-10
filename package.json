@@ -1,0 +1,38 @@
+{
+  "name": "mongo-collection-lock",
+  "version": "1.0.0",
+  "description": "Lock a mongo collection opportunistically because you chose the wrong database and need something that sort of behaves like a transaction (but not really)",
+  "main": "lib/index.js",
+  "scripts": {
+    "test": "mocha test",
+    "lint": "jshint lib test && jscs lib test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/dougmoscrop/node-mongo-optlock.git"
+  },
+  "keywords": [
+    "mongo",
+    "lock",
+    "transaction"
+  ],
+  "author": "Doug Moscrop",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/dougmoscrop/node-mongo-collection-lock/issues"
+  },
+  "homepage": "https://github.com/dougmoscrop/node-mongo-collection#readme",
+  "dependencies": {
+    "async": "^1.4.2",
+    "lodash": "^3.10.1",
+    "moment": "^2.10.6",
+    "uuid": "^2.0.1"
+  },
+  "devDependencies": {
+    "jscs": "^2.0.0",
+    "jshint": "^2.8.0",
+    "mocha": "^2.2.5",
+    "should": "^7.0.3",
+    "sinon": "^1.15.4"
+  }
+}
