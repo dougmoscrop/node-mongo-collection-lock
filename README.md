@@ -1,5 +1,6 @@
-# node-mongo-spinlock
-
+# mongo-spinlock
+[![Circle CI](https://circleci.com/gh/dougmoscrop/node-mongodb-spinlock.svg?style=svg)](https://circleci.com/gh/dougmoscrop/node-mongodb-spinlock)
+[![Coverage Status](https://coveralls.io/repos/dougmoscrop/node-mongodb-spinlock/badge.svg?branch=master&service=github)](https://coveralls.io/github/dougmoscrop/node-mongodb-spinlock?branch=master)
 ```javascript
 var spinlock = require('mongo-spinlock');
 ```
@@ -63,4 +64,4 @@ This only works if *all changes to a particular field go through a spinlock* for
 
 You can issue update commands that aren't restricted to `lock.0.id` if they're just marking a lock as released and not modifying the object. It still goes "lock everything" then "release the unnecessary stuff".
 
-Obviously newly created items don't participate in the lock, so whatever logic / hopes / dreams you have needs to be able to deal with that. Also all your updates need to be idempotent and all that jazz.
+Newly created items don't participate in the lock, so whatever logic / hopes / dreams you have needs to be able to deal with that. Also all your updates need to be idempotent and all that jazz.
