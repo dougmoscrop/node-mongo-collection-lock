@@ -1,3 +1,3 @@
-# node-mongo-collection-lock
+# node-mongo-spinlock
 
 Soon.
