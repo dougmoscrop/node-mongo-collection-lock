@@ -1,10 +1,14 @@
 machine:
   environment:
     CI: true
+  services:
+    - docker
 
 dependencies:
   pre:
+    - sudo /etc/init.d/mongodb stop
     - npm install -g git+https://github.com/saponifi3d/node-coveralls#fba900513bb8653d8d83b7c35053be72d519d5d6
+    - docker run -d --net=host mongo:3.0.6
 
 test:
   override:
