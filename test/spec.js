@@ -19,12 +19,8 @@ describe('spinlock', function() {
 				callback(null, { value: operation });
 			});
 
-			remove = sinon.spy(function(query, callback) {
-				callback();
-			});
-
-			action = sinon.spy(function(lock) {
-				lock.release();
+			action = sinon.spy(function(release) {
+				release();
 			});
 
 			collection = {
@@ -36,7 +32,7 @@ describe('spinlock', function() {
 
 		describe('successful action', function() {
 			beforeEach(function(done) {
-				spinlock(collection)(action, done);
+				spinlock(collection).acquire(action, done);
 			});
 
 			it('gets called', function() {
@@ -49,10 +45,6 @@ describe('spinlock', function() {
 
 			it('calls findAndModify', function() {
 				assert(findAndModify.called);
-			});
-
-			it('calls remove', function() {
-				assert(remove.called);
 			});
 
 			it('passes a lock to the action', function() {
@@ -69,7 +61,7 @@ describe('spinlock', function() {
 
 			it('missing action', function() {
 				assert.throws(function() {
-					spinlock({})();
+					spinlock({}).acquire();
 				});
 			});
 		});
@@ -80,7 +72,7 @@ describe('spinlock', function() {
 					update: function(query, operation, options, callback) {
 						callback(new Error());
 					}
-				})(function() {
+				}).acquire(function() {
 					throw new Error('Should not be called');
 				}, function(err) {
 					assert(err);
@@ -89,8 +81,8 @@ describe('spinlock', function() {
 			});
 
 			it('when action fails', function(done) {
-				spinlock(collection)(function(lock) {
-					lock.release(new Error());
+				spinlock(collection).acquire(function(release) {
+					release(new Error());
 				}, function(err) {
 					assert(err);
 					done();
@@ -104,7 +96,7 @@ describe('spinlock', function() {
 			db,
 			collection,
 			otherCollection,
-			acquire;
+			lock;
 
 		before(function(done) {
 			MongoClient.connect(url, function(err, db) {
@@ -129,26 +121,29 @@ describe('spinlock', function() {
 		});
 
 		beforeEach(function(done) {
-			acquire = spinlock(collection);
+			lock = spinlock(collection);
 			collection.remove({}, done);
 		});
 
 		describe('successful action', function(done) {
 
 			beforeEach(function(done) {
-				acquire(function(lock) {
-					lock.release();
+				lock.acquire(function(release) {
+					release();
 				}, done);
 			});
 
-			it('removes locks', function(done) {
+			it('has no keys in locks', function(done) {
 				collection.find({}).toArray(function(err, results) {
 					if (err) {
 						done(err);
 						return;
 					}
 
-					results.should.have.lengthOf(0);
+					assert(results.every(function(result) {
+						return result.key === undefined;
+					}));
+
 					done();
 				});
 			});
@@ -157,9 +152,9 @@ describe('spinlock', function() {
 				this.timeout(5000);
 				this.slow(4000);
 
-				acquire(function(outer) {
-					acquire(function(inner) {
-						inner.release();
+				lock.acquire(function() {
+					lock.acquire(function(release) {
+						release();
 					}, done);
 				}, function() {
 					throw new Error('Should not be called');
@@ -172,7 +167,7 @@ describe('spinlock', function() {
 
 			it('update is uniform', function(done) {
 				async.map(['foo', 'bar', 'baz', 'foobar', 'blah', 'many', 'doge', 'mongo'], function(term, callback) {
-					acquire(function(lock) {
+					lock.acquire(function(release) {
 						var query = { $isolated: 1 };
 
 						async.series([
@@ -186,7 +181,7 @@ describe('spinlock', function() {
 									otherCollection.update(query, { $set: { second: term } }, { upsert: true, multi: true }, _next);
 								}, Math.floor((Math.random() * 50) + 1));
 							}
-						], lock.release);
+						], release);
 					}, callback);
 				}, function(err) {
 					if (err) {
