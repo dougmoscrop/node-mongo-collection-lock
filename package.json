@@ -1,6 +1,6 @@
 {
   "name": "mongodb-spinlock",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "description": "Lock a mongodb collection because you chose the wrong database and need something that sort of behaves like a transaction",
   "main": "lib/index.js",
   "scripts": {
